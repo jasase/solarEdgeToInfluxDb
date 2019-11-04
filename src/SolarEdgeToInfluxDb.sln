@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.138
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolarEdgeToInfluxDb", "SolarEdgeToInfluxDb\SolarEdgeToInfluxDb.csproj", "{EC83D5A4-8A3D-44E3-B4E0-4B7EA79BCF78}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4657F58E-8E90-4A49-8458-F46D31A069C7}"
+	ProjectSection(SolutionItems) = preProject
+		..\azure-pipelines.yml = ..\azure-pipelines.yml
+		..\gitversion.yml = ..\gitversion.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EC83D5A4-8A3D-44E3-B4E0-4B7EA79BCF78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC83D5A4-8A3D-44E3-B4E0-4B7EA79BCF78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC83D5A4-8A3D-44E3-B4E0-4B7EA79BCF78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC83D5A4-8A3D-44E3-B4E0-4B7EA79BCF78}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EB551A13-1BAE-4925-9CC2-8B4B9729B819}
+	EndGlobalSection
+EndGlobal
