@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -24,6 +25,20 @@ namespace SolarEdgeToInfluxDb.SolarEdgeApi
             return data.Sites.Site;
         }
 
+        public void PowerDetails(Site site)
+        {
+
+        }
+
+        public EnergyDetailsResult EnergyDetails(Site site, DateTime start, DateTime end)
+        {
+            var data = Request<EnergyDetailsResult>($"site/{site.Id}/energyDetails?timeUnit=QUARTER_OF_AN_HOUR&startTime={ConvertToString(start)}&endTime={ConvertToString(end)}");
+            return data;
+        }
+
+        private string ConvertToString(DateTime time)
+            => time.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
         private TData Request<TData>(string relativePath)
         {
             using (var client = new HttpClient())
@@ -40,10 +55,12 @@ namespace SolarEdgeToInfluxDb.SolarEdgeApi
                 }
                 var result = client.GetAsync(uri.Uri).Result;
                 var strContent = result.Content.ReadAsStringAsync().Result;
-                return JsonSerializer.Deserialize<TData>(strContent, new JsonSerializerOptions
+                var options = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true
-                });
+                    PropertyNameCaseInsensitive = true,
+                };
+                options.Converters.Add(new DateTimeConverter());
+                return JsonSerializer.Deserialize<TData>(strContent, options);
             }
         }
     }

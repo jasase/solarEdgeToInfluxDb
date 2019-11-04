@@ -38,6 +38,11 @@ namespace SolarEdgeToInfluxDb
             var apiClient = new SolarEdgeApiClient(solarEdgeSettings.ApiKey);
 
             var sites = apiClient.ListSites();
+
+            foreach (var t in sites)
+            {
+                var s = apiClient.EnergyDetails(t, DateTime.Now.AddHours(-5), DateTime.Now);
+            }
         }
     }
 }
