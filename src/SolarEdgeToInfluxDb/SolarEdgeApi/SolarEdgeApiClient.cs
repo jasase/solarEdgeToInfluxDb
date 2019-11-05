@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
 using System.Text;
@@ -13,9 +14,14 @@ namespace SolarEdgeToInfluxDb.SolarEdgeApi
         private readonly string _apiKey;
         private readonly Uri _baseUri;
 
-        public SolarEdgeApiClient(string apiKey)
+        public SolarEdgeApiClient(SolarEdgeSetting setting)
         {
-            _apiKey = apiKey;
+            if (setting is null)
+            {
+                throw new ArgumentNullException(nameof(setting));
+            }
+
+            _apiKey = setting.ApiKey;
             _baseUri = new Uri("https://monitoringapi.solaredge.com/");
         }
 

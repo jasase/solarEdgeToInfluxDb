@@ -4,11 +4,11 @@ using Framework.Abstraction.Plugins;
 using Framework.Abstraction.Services;
 using Framework.Abstraction.Services.DataAccess.InfluxDb;
 using Framework.Abstraction.Services.Scheduling;
+using Framework.Core.Scheduling;
 using ServiceHost.Contracts;
+using SolarEdgeToInfluxDb.Repositories;
 using SolarEdgeToInfluxDb.SolarEdgeApi;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SolarEdgeToInfluxDb
 {
@@ -34,15 +34,15 @@ namespace SolarEdgeToInfluxDb
 
         protected override void ActivateInternal()
         {
-            var solarEdgeSettings = Resolver.GetInstance<SolarEdgeSetting>();
-            var apiClient = new SolarEdgeApiClient(solarEdgeSettings.ApiKey);
+            ConfigurationResolver.AddRegistration(new SingletonRegistration<SolarEdgeApiClient, SolarEdgeApiClient>());
+            ConfigurationResolver.AddRegistration(new SingletonRegistration<SiteListRepository, SiteListRepository>());
 
-            var sites = apiClient.ListSites();
+            var historyJob = Resolver.CreateConcreteInstanceWithDependencies<SolarEdgeHistoryJob>();
+            var powerFlowJob = Resolver.CreateConcreteInstanceWithDependencies<SolaredgePowerFlowJob>();
 
-            foreach (var t in sites)
-            {
-                var s = apiClient.EnergyDetails(t, DateTime.Now.AddHours(-5), DateTime.Now);
-            }
+            var scheduler = Resolver.GetInstance<ISchedulingService>();
+            scheduler.AddJob(historyJob, new PollingPlan(TimeSpan.FromHours(1.5)));
+            scheduler.AddJob(powerFlowJob, new PollingPlan(TimeSpan.FromSeconds(30)));
         }
     }
 }

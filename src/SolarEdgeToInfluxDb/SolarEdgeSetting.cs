@@ -9,12 +9,15 @@ namespace SolarEdgeToInfluxDb
         public bool EnablePowerflow { get; set; }
         public string ApiKey { get; set; }
 
+        public string TargetDatabase { get; set; }
+
         public SolarEdgeSetting()
         {
             EnablePowerflow = true;
             Username = string.Empty;
             Password = string.Empty;
             ApiKey = string.Empty;
+            TargetDatabase = "SolarEdge";
         }
     }
 }

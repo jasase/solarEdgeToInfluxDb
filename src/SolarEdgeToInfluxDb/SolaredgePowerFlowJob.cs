@@ -10,8 +10,6 @@ namespace SolarEdgeToInfluxDb
         public string Name => "SolarEdge-PowerFlow";
 
         public void Execute()
-        {
-            throw new NotImplementedException();
-        }
+        { }
     }
 }
