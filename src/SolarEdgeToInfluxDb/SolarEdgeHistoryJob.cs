@@ -51,7 +51,40 @@ namespace SolarEdgeToInfluxDb
             var powerData = ProcessPowerDetails(site, from, now);
             _influxDbUpload.QueueWrite(powerData.ToArray(), 5, _solarEdgeSetting.TargetDatabase);
 
+            var storageData = ProcessStorageData(site, from, now);
+            _influxDbUpload.QueueWrite(storageData.ToArray(), 5, _solarEdgeSetting.TargetDatabase);
+
             _lastRequest = now;
+        }
+
+        private IEnumerable<InfluxDbEntry> ProcessStorageData(Site site, DateTime start, DateTime end)
+        {
+            var data = _apiClient.StorageData(site, start, end);
+            return from b in data.StorageData.Batteries
+                   from t in b.Telemetries
+                   select new InfluxDbEntry
+                   {
+                       Measurement = "Storage",
+                       Time = t.TimeStamp,
+                       Fields = new[]
+                       {
+                            new InfluxDbEntryField { Name = "Power", Value = t.Power },
+                            new InfluxDbEntryField { Name = "BatteryPercentage", Value = t.BatteryPercentageState },
+                            new InfluxDbEntryField { Name = "State", Value = t.BatteryState },
+                            new InfluxDbEntryField { Name = "LifeTimeEnergyCharged", Value = t.LifeTimeEnergyCharged },
+                            new InfluxDbEntryField { Name = "LifeTimeEnergyDischarged", Value = t.LifeTimeEnergyDischarged },
+                            new InfluxDbEntryField { Name = "FullPackEnergyAvailable", Value = t.FullPackEnergyAvailable },
+                            new InfluxDbEntryField { Name = "InternalTemp", Value = t.InternalTemp },
+                            new InfluxDbEntryField { Name = "ACGridCharging", Value = t.ACGridCharging }
+                       },
+                       Tags = new[]
+                       {
+                           new InfluxDbEntryField { Name = "Site", Value = site.Id },
+                           new InfluxDbEntryField { Name = "SiteName", Value = site.Name },
+                           new InfluxDbEntryField { Name = "SerialNumber", Value = b.SerialNumber },
+                       }
+                   };
+
         }
 
         private IEnumerable<InfluxDbEntry> ProcessEnergyDetails(Site site, DateTime start, DateTime end)
@@ -113,3 +146,4 @@ namespace SolarEdgeToInfluxDb
         }
     }
 }
+
