@@ -49,13 +49,10 @@ stages:
         vstsFeed: 'e745086d-201a-4e45-8d8f-ed7088052af8'
         restoreDirectory: 'NugetPackage'
 
-    - task: Bash@3
+    - bash: Bash@3
       inputs:
         targetType: 'inline'
-        script: |
-        # Write your commands here
-              
-        ls -R'
+        script: 'ls -R'
   
     - task: Docker@2
       displayName: Build the image
