@@ -5,6 +5,7 @@ using Framework.Abstraction.Services;
 using Framework.Abstraction.Services.DataAccess.InfluxDb;
 using Framework.Abstraction.Services.Scheduling;
 using ServiceHost.Contracts;
+using SolarEdgeToInfluxDb.SolarEdgeApi;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,7 +34,15 @@ namespace SolarEdgeToInfluxDb
 
         protected override void ActivateInternal()
         {
-            throw new NotImplementedException();
+            var solarEdgeSettings = Resolver.GetInstance<SolarEdgeSetting>();
+            var apiClient = new SolarEdgeApiClient(solarEdgeSettings.ApiKey);
+
+            var sites = apiClient.ListSites();
+
+            foreach (var t in sites)
+            {
+                var s = apiClient.EnergyDetails(t, DateTime.Now.AddHours(-5), DateTime.Now);
+            }
         }
     }
 }
