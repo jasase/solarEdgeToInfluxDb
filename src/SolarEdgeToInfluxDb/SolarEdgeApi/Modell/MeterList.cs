@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SolarEdgeToInfluxDb.SolarEdgeApi.Modell
 {
-    public class EnergyDetails
+    public class MeterList
     {
         public string TimeUnit { get; set; }
         public string Unit { get; set; }

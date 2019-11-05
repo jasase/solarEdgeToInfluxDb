@@ -45,9 +45,11 @@ namespace SolarEdgeToInfluxDb
             var nowMinus1Day = now.AddDays(-1);
             var from = nowMinus1Day > _lastRequest ? nowMinus1Day : _lastRequest;
 
-            var energyData = ProcessEnergyDetails(site, from, now);            
-
+            var energyData = ProcessEnergyDetails(site, from, now);
             _influxDbUpload.QueueWrite(energyData.ToArray(), 5, _solarEdgeSetting.TargetDatabase);
+
+            var powerData = ProcessPowerDetails(site, from, now);
+            _influxDbUpload.QueueWrite(powerData.ToArray(), 5, _solarEdgeSetting.TargetDatabase);
 
             _lastRequest = now;
         }
@@ -55,8 +57,18 @@ namespace SolarEdgeToInfluxDb
         private IEnumerable<InfluxDbEntry> ProcessEnergyDetails(Site site, DateTime start, DateTime end)
         {
             var data = _apiClient.EnergyDetails(site, start, end);
+            return ProcessMeterList(site, data.EnergyDetails, "Energy");
+        }
 
-            foreach (var dateGroup in from m in data.EnergyDetails.Meters
+        private IEnumerable<InfluxDbEntry> ProcessPowerDetails(Site site, DateTime start, DateTime end)
+        {
+            var data = _apiClient.PowerDetails(site, start, end);
+            return ProcessMeterList(site, data.PowerDetails, "Power");
+        }
+
+        private IEnumerable<InfluxDbEntry> ProcessMeterList(Site site, MeterList meterList, string measurement)
+        {
+            foreach (var dateGroup in from m in meterList.Meters
                                       from v in m.Values
                                       group new { m.Type, v.Value } by v.Date into groupByDate
                                       select groupByDate)
@@ -72,7 +84,7 @@ namespace SolarEdgeToInfluxDb
                         Name = x.Key,
                         Value = x.FirstOrDefault().Value
                     }).ToArray(),
-                    Tags = new []
+                    Tags = new[]
                     {
                         new InfluxDbEntryField
                         {
@@ -84,8 +96,18 @@ namespace SolarEdgeToInfluxDb
                             Name = "SiteName",
                             Value = site.Name
                         },
+                        new InfluxDbEntryField
+                        {
+                            Name = "Unit",
+                            Value = meterList.Unit
+                        },
+                        new InfluxDbEntryField
+                        {
+                            Name = "TimeUnit",
+                            Value = meterList.TimeUnit
+                        },
                     },
-                    Measurement = "Energy"
+                    Measurement = measurement
                 };
             }
         }

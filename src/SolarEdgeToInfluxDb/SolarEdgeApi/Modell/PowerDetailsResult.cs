@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SolarEdgeToInfluxDb.SolarEdgeApi.Modell
 {
-    public class EnergyDetailsResult
+    public class PowerDetailsResult
     {
-        public MeterList EnergyDetails { get; set; }
+        public MeterList PowerDetails { get; set; }
     }
 }

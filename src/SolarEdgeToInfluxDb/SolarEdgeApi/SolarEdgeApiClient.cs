@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using SolarEdgeToInfluxDb.SolarEdgeApi.Modell;
 
@@ -29,16 +26,17 @@ namespace SolarEdgeToInfluxDb.SolarEdgeApi
         {
             var data = Request<SiteListResult>("sites/list");
             return data.Sites.Site;
-        }
-
-        public void PowerDetails(Site site)
-        {
-
-        }
+        }        
 
         public EnergyDetailsResult EnergyDetails(Site site, DateTime start, DateTime end)
         {
             var data = Request<EnergyDetailsResult>($"site/{site.Id}/energyDetails?timeUnit=QUARTER_OF_AN_HOUR&startTime={ConvertToString(start)}&endTime={ConvertToString(end)}");
+            return data;
+        }
+
+        public PowerDetailsResult PowerDetails(Site site, DateTime start, DateTime end)
+        {
+            var data = Request<PowerDetailsResult>($"site/{site.Id}/powerDetails?timeUnit=QUARTER_OF_AN_HOUR&startTime={ConvertToString(start)}&endTime={ConvertToString(end)}");
             return data;
         }
 
@@ -69,5 +67,7 @@ namespace SolarEdgeToInfluxDb.SolarEdgeApi
                 return JsonSerializer.Deserialize<TData>(strContent, options);
             }
         }
+
+        
     }
 }
