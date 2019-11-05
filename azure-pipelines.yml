@@ -27,7 +27,8 @@ stages:
 #        vmImage: 'ubuntu-latest'
 
   - job: linux
-      pool: 'ubuntu-latest'
+      pool: 
+        vmImage: 'ubuntu-latest'
       steps:
     
       - task: GitVersion@5
