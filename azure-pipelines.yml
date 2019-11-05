@@ -63,7 +63,7 @@ stages:
         Dockerfile: '**/Dockerfile'
         buildContext: '$(Build.SourcesDirectory)/src'
         tags: |
-          '$(GitVersion.NuGetVersionV2)'
+          $(GitVersion.NuGetVersionV2)
           latest
           
     - task: Docker@2
@@ -73,6 +73,6 @@ stages:
         repository: 'jasase/solaredgetoinfluxdb'
         command: 'push'
         tags: |
-          '$(GitVersion.NuGetVersionV2)'
+          $(GitVersion.NuGetVersionV2)
           latest
   
