@@ -15,6 +15,8 @@ FROM build AS publish
 RUN dotnet publish "SolarEdgeToInfluxDb.csproj" -c Release -o /app/publish
 
 FROM base AS final
+RUN mkdir /logs
+RUN mkdir /configuration
 VOLUME /logs /configuration
 WORKDIR /app
 COPY --from=publish /app/publish .
