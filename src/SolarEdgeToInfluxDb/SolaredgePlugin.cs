@@ -42,7 +42,7 @@ namespace SolarEdgeToInfluxDb
 
             var scheduler = Resolver.GetInstance<ISchedulingService>();
             scheduler.AddJob(historyJob, new PollingPlan(TimeSpan.FromHours(1.5)));
-            scheduler.AddJob(powerFlowJob, new PollingPlan(TimeSpan.FromSeconds(30)));
+            scheduler.AddJob(powerFlowJob, new PollingPlan(TimeSpan.FromSeconds(15)));
         }
     }
 }
