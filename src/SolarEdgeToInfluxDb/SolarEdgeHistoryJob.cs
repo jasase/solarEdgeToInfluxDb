@@ -110,7 +110,7 @@ namespace SolarEdgeToInfluxDb
 
                 yield return new InfluxDbEntry
                 {
-                    Time = dateGroup.Key,
+                    Time = TimeZoneInfo.ConvertTimeToUtc(dateGroup.Key, site.Location.TimeZoneInfo),
                     Fields = fields.Select(x => new InfluxDbEntryField
                     {
                         Name = x.Key,

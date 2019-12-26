@@ -77,7 +77,7 @@ namespace SolarEdgeToInfluxDb.Repositories
             }
 
             var timeZone = TimeZoneInfo.GetSystemTimeZones()
-                                       .FirstOrDefault(x => x.DisplayName
+                                       .FirstOrDefault(x => x.Id
                                                              .Equals(site.Location.TimeZone, StringComparison.InvariantCultureIgnoreCase));
             if (timeZone != null)
             {
