@@ -48,11 +48,17 @@ namespace SolarEdgeToInfluxDb.Repositories
                 try
                 {
                     _sites = _apiClient.ListSites();
+                    foreach (var site in _sites)
+                    {
+                        SetTimezoneInformation(site);
+                    }
+
                     _lastRefresh = DateTime.Now;
 
+                    const string FORMAT = "{0,15} | {1,50} | {2,30} | {3,30}";
                     _logger.Debug("Site List: {0}{1}",
                         Environment.NewLine,
-                        string.Join(Environment.NewLine, _sites.Select(x => x.Id + " | " + x.Name)));
+                        string.Join(Environment.NewLine, _sites.Select(x => string.Format(FORMAT, x.Id, x.Name, x.Location.TimeZone, x.Location.TimeZoneInfo.DisplayName))));
                 }
                 catch (Exception ex)
                 {
@@ -60,6 +66,26 @@ namespace SolarEdgeToInfluxDb.Repositories
                     _sites = Array.Empty<Site>();
                     _lastRefresh = DateTime.Now.AddHours(-24).AddMinutes(5);
                 }
+            }
+        }
+
+        private void SetTimezoneInformation(Site site)
+        {
+            if (site.Location == null)
+            {
+                site.Location = new SiteLocation();
+            }
+
+            var timeZone = TimeZoneInfo.GetSystemTimeZones()
+                                       .FirstOrDefault(x => x.DisplayName
+                                                             .Equals(site.Location.TimeZone, StringComparison.InvariantCultureIgnoreCase));
+            if (timeZone != null)
+            {
+                site.Location.TimeZoneInfo = timeZone;
+            }
+            else
+            {
+                site.Location.TimeZoneInfo = TimeZoneInfo.Local;
             }
         }
     }

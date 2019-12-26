@@ -6,7 +6,6 @@ using SolarEdgeToInfluxDb.SolarEdgeApi.Modell;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SolarEdgeToInfluxDb
 {
@@ -65,7 +64,7 @@ namespace SolarEdgeToInfluxDb
                    select new InfluxDbEntry
                    {
                        Measurement = "Storage",
-                       Time = t.TimeStamp,
+                       Time = TimeZoneInfo.ConvertTimeToUtc(t.TimeStamp, site.Location.TimeZoneInfo),
                        Fields = new[]
                        {
                             new InfluxDbEntryField { Name = "Power", Value = t.Power },
