@@ -48,7 +48,7 @@ namespace SolarEdgeToInfluxDb
                 Create("Pv", site, powerFlow.SiteCurrentPowerFlow.Pv),
                 CreateStorage("Storage", site, powerFlow.SiteCurrentPowerFlow.Storage),
             };
-            _influxDbUpload.QueueWrite(entry, 5, _solarEdgeSetting.TargetDatabase);
+            _influxDbUpload.QueueWrite(entry, 5, _solarEdgeSetting.TargetDatabase, "week_one");
         }
 
         private InfluxDbEntry Create(string type, Site site, PowerflowData data)

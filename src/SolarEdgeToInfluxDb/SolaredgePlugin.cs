@@ -34,6 +34,8 @@ namespace SolarEdgeToInfluxDb
 
         protected override void ActivateInternal()
         {
+            SetupDatabase();
+
             ConfigurationResolver.AddRegistration(new SingletonRegistration<SolarEdgeApiClient, SolarEdgeApiClient>());
             ConfigurationResolver.AddRegistration(new SingletonRegistration<SiteListRepository, SiteListRepository>());
 
@@ -43,6 +45,17 @@ namespace SolarEdgeToInfluxDb
             var scheduler = Resolver.GetInstance<ISchedulingService>();
             scheduler.AddJob(historyJob, new PollingPlan(TimeSpan.FromHours(1.5)));
             scheduler.AddJob(powerFlowJob, new PollingPlan(TimeSpan.FromSeconds(15)));
+        }
+
+        private void SetupDatabase()
+        {
+            var solarEdgeSetting = Resolver.CreateConcreteInstanceWithDependencies<SolarEdgeSetting>();
+            var influxManagement = Resolver.CreateConcreteInstanceWithDependencies<IInfluxDbManagement>();
+
+            influxManagement.EnsureDatabase(solarEdgeSetting.TargetDatabase);
+
+            influxManagement.EnsureRetentionPolicy(solarEdgeSetting.TargetDatabase, new InfluxDbRetentionPolicyDefinition("week_one", TimeSpan.FromDays(7), false));
+            //influxManagement.EnsureRetentionPolicy(solarEdgeSetting.TargetDatabase, new InfluxDbRetentionPolicyDefinition("infinite", TimeSpan.MinValue, true));
         }
     }
 }
