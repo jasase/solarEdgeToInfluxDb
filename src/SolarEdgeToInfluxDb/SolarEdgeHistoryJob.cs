@@ -40,7 +40,7 @@ namespace SolarEdgeToInfluxDb
 
         private void Execute(Site site)
         {
-            var now = DateTime.Now;
+            var now = TimeZoneInfo.ConvertTime(DateTime.Now, site.Location.TimeZoneInfo);
             var nowMinus1Day = now.AddDays(-1);
             var from = nowMinus1Day > _lastRequest ? nowMinus1Day : _lastRequest;
 
