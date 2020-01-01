@@ -5,6 +5,7 @@ using SolarEdgeToInfluxDb.SolarEdgeApi;
 using SolarEdgeToInfluxDb.SolarEdgeApi.Modell;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SolarEdgeToInfluxDb
@@ -43,15 +44,27 @@ namespace SolarEdgeToInfluxDb
 
             var entry = new[]
             {
-                Create("Grid", site, powerFlow.SiteCurrentPowerFlow.Grid),
-                Create("Load", site, powerFlow.SiteCurrentPowerFlow.Load),
-                Create("Pv", site, powerFlow.SiteCurrentPowerFlow.Pv),
-                CreateStorage("Storage", site, powerFlow.SiteCurrentPowerFlow.Storage),
+                Create("Grid",
+                       site,
+                       powerFlow.SiteCurrentPowerFlow.Grid,
+                       powerFlow.SiteCurrentPowerFlow.Connections.Any(x => x.To.Equals( "Grid", StringComparison.InvariantCultureIgnoreCase))),
+                Create("Load",
+                       site,
+                       powerFlow.SiteCurrentPowerFlow.Load,
+                       false),
+                Create("Pv",
+                       site,
+                       powerFlow.SiteCurrentPowerFlow.Pv,
+                       false),
+                CreateStorage("Storage",
+                              site,
+                              powerFlow.SiteCurrentPowerFlow.Storage,
+                              powerFlow.SiteCurrentPowerFlow.Connections.Any(x => x.From.Equals( "Storage", StringComparison.InvariantCultureIgnoreCase)))
             };
             _influxDbUpload.QueueWrite(entry, 5, _solarEdgeSetting.TargetDatabase, "week_one");
         }
 
-        private InfluxDbEntry Create(string type, Site site, PowerflowData data)
+        private InfluxDbEntry Create(string type, Site site, PowerflowData data, bool switchFlowDirection)
             => new InfluxDbEntry
             {
                 Measurement = "PowerFlow",
@@ -63,12 +76,12 @@ namespace SolarEdgeToInfluxDb
                            },
                 Fields = new[]
                     {
-                        new InfluxDbEntryField { Name = "CurrentPower", Value = data.CurrentPower },
+                        new InfluxDbEntryField { Name = "CurrentPower", Value = switchFlowDirection ? data.CurrentPower * -1 : data.CurrentPower },
                         new InfluxDbEntryField { Name = "Status", Value = data.Status }
                     }
             };
 
-        private InfluxDbEntry CreateStorage(string type, Site site, PowerflowDataStorage data)
+        private InfluxDbEntry CreateStorage(string type, Site site, PowerflowDataStorage data, bool switchFlowDirection)
             => new InfluxDbEntry
             {
                 Measurement = "PowerFlow",
@@ -80,7 +93,7 @@ namespace SolarEdgeToInfluxDb
                            },
                 Fields = new[]
                     {
-                        new InfluxDbEntryField { Name = "CurrentPower", Value = data.CurrentPower },
+                        new InfluxDbEntryField { Name = "CurrentPower", Value = switchFlowDirection ? data.CurrentPower * -1 : data.CurrentPower },
                         new InfluxDbEntryField { Name = "ChargeLevel", Value = data.ChargeLevel },
                         new InfluxDbEntryField { Name = "Critical", Value = data.Critical },
                         new InfluxDbEntryField { Name = "Status", Value = data.Status }
