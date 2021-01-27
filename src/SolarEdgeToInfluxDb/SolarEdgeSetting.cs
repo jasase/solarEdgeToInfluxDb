@@ -11,6 +11,11 @@ namespace SolarEdgeToInfluxDb
 
         public string TargetDatabase { get; set; }
 
+
+        public string MqttAddress { get; set; }
+        public string MqttUsername { get; set; }
+        public string MqttPassword { get; set; }
+
         public SolarEdgeSetting()
         {
             EnablePowerflow = true;
@@ -18,6 +23,10 @@ namespace SolarEdgeToInfluxDb
             Password = string.Empty;
             ApiKey = string.Empty;
             TargetDatabase = "SolarEdge";
+
+            MqttAddress = "";
+            MqttUsername = "";
+            MqttPassword = "";
         }
     }
 }

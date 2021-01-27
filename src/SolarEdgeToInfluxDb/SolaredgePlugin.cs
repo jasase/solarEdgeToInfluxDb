@@ -1,14 +1,17 @@
-﻿using Framework.Abstraction.Extension;
+﻿using System;
+using Framework.Abstraction.Extension;
 using Framework.Abstraction.IocContainer;
 using Framework.Abstraction.Plugins;
 using Framework.Abstraction.Services;
 using Framework.Abstraction.Services.DataAccess.InfluxDb;
 using Framework.Abstraction.Services.Scheduling;
 using Framework.Core.Scheduling;
+using MQTTnet;
+using MQTTnet.Client.Options;
+using MQTTnet.Extensions.ManagedClient;
 using ServiceHost.Contracts;
 using SolarEdgeToInfluxDb.Repositories;
 using SolarEdgeToInfluxDb.SolarEdgeApi;
-using System;
 
 namespace SolarEdgeToInfluxDb
 {
@@ -35,6 +38,7 @@ namespace SolarEdgeToInfluxDb
         protected override void ActivateInternal()
         {
             SetupDatabase();
+            SetupMqttClient();
 
             ConfigurationResolver.AddRegistration(new SingletonRegistration<SolarEdgeApiClient, SolarEdgeApiClient>());
             ConfigurationResolver.AddRegistration(new SingletonRegistration<SiteListRepository, SiteListRepository>());
@@ -56,6 +60,35 @@ namespace SolarEdgeToInfluxDb
 
             influxManagement.EnsureRetentionPolicy(solarEdgeSetting.TargetDatabase, new InfluxDbRetentionPolicyDefinition("week_one", TimeSpan.FromDays(7), false));
             //influxManagement.EnsureRetentionPolicy(solarEdgeSetting.TargetDatabase, new InfluxDbRetentionPolicyDefinition("infinite", TimeSpan.MinValue, true));
+        }
+
+        private void SetupMqttClient()
+        {
+            var solarEdgeSetting = Resolver.CreateConcreteInstanceWithDependencies<SolarEdgeSetting>();
+
+
+            var lwtMessage = new MqttApplicationMessageBuilder()
+                                    .WithRetainFlag(true)
+                                    .WithTopic("tele/solaredge/LWT")
+                                    .WithPayload("offline")
+                                    .Build();
+            var clientOptions = new MqttClientOptionsBuilder().WithClientId("SolarEdge")
+                                                              .WithTcpServer(solarEdgeSetting.MqttAddress)
+                                                              .WithWillMessage(lwtMessage);
+
+            if (!string.IsNullOrWhiteSpace(solarEdgeSetting.MqttUsername))
+            {
+                clientOptions.WithCredentials(solarEdgeSetting.MqttUsername, solarEdgeSetting.MqttPassword);
+            }
+
+            var options = new ManagedMqttClientOptionsBuilder().WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+                                                               .WithClientOptions(clientOptions.Build())
+                                                               .Build();
+
+            var mqttClient = new MqttFactory().CreateManagedMqttClient();
+            mqttClient.StartAsync(options).Wait();
+
+            ConfigurationResolver.AddRegistration(new SingletonRegistration<IManagedMqttClient>(mqttClient));
         }
     }
 }
