@@ -36,6 +36,12 @@ stages:
       inputs:
         runtime: 'core'
         configFilePath: 'gitversion.yml'
+
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: 'build'
+        Contents: 'nuget.config'
+        TargetFolder: 'src'
   
     - task: NuGetToolInstaller@1
       inputs:
