@@ -31,30 +31,21 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     
-    - task: GitVersion@5
-      displayName: 'Get Version Number'
+    - checkout: self
+      fetchDepth: 0
+
+
+    - task: gitversion/setup@0
+      displayName: Install GitVersion
       inputs:
-        runtime: 'core'
+        versionSpec: '5.x'
+
+    - task: gitversion/execute@0
+      displayName: Determine Version
+      inputs:
+        useConfigFile: true
         configFilePath: 'gitversion.yml'
-
-    - task: CopyFiles@2
-      inputs:
-        SourceFolder: 'build'
-        Contents: 'nuget.config'
-        TargetFolder: 'src'
-  
-    - task: NuGetToolInstaller@1
-      inputs:
-        versionSpec: 
-  
-    - task: NuGetCommand@2
-      inputs:
-        command: 'restore'
-        restoreSolution: '**/*.sln'
-        feedsToUse: 'select'
-        vstsFeed: 'e745086d-201a-4e45-8d8f-ed7088052af8'
-        restoreDirectory: 'NugetPackage'
-
+    
     - task: Bash@3
       inputs:
         targetType: 'inline'
